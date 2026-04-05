@@ -98,6 +98,27 @@ makepad-2.0-book/
 └── .github/workflows/   # GitHub Pages CI/CD
 ```
 
+## Related: Makepad Skills for AI Agents
+
+This book has a companion project — [**makepad-skills**](https://github.com/ZhangHanDong/makepad-skills) — a set of Claude Code skills that encode Makepad 2.0 knowledge into reusable AI agent capabilities.
+
+| Skill | Purpose |
+|-------|---------|
+| `makepad-basics` | App structure, `app_main!`, `script_mod!`, getting started |
+| `makepad-dsl` | Splash DSL syntax, property system, `let` bindings |
+| `makepad-layout` | Layout engine (Turtle), `Fill`/`Fit`, `flow`, `align` |
+| `makepad-widgets` | Widget catalog — View, Button, Label, PortalList, etc. |
+| `makepad-shaders` | Sdf2d shader system, `pixel fn`, `draw_bg` |
+| `makepad-animation` | Animator state machine, hover/pressed effects |
+| `makepad-event-action` | Event handling, `MatchEvent`, `handle_actions` |
+| `makepad-splash` | Splash scripting language runtime |
+| `makepad-reference` | Troubleshooting and API reference |
+| `makepad-migration` | 1.x → 2.0 migration guide |
+
+These skills allow AI agents (Claude Code, etc.) to write correct Makepad code by providing contextual knowledge about Splash syntax rules, widget APIs, common pitfalls, and architectural patterns — the same knowledge documented in this book, but in a machine-consumable format.
+
+**Install**: Follow the instructions at [github.com/ZhangHanDong/makepad-skills](https://github.com/ZhangHanDong/makepad-skills).
+
 ## Source References
 
 This book references the [Makepad](https://github.com/makepad/makepad) source code (dev branch, April 2026 snapshot). Key source files:
