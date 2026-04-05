@@ -100,7 +100,7 @@ sequenceDiagram
 |------|------|
 | 代码全在一个地方，结构清晰 | 没有类型系统保护 |
 | AI 可以完整生成和修改 | 大型应用难以维护 |
-| 不需要 Rust 编译 | 无法调用 Rust 库（网络、文件、加密等） |
+| 不需要 Rust 编译 | 无法直接调用宿主 Rust 库（文件、数据库、加密、本地系统资源等；网络请求可用 `net.http_request`） |
 | 热重载即时生效 | 性能不如原生 Rust |
 
 纯 Splash 模式最适合三种场景：AI 生成的应用（详见第27章：Canvas 架构剖析）、快速原型、以及交互逻辑简单的工具型 UI。
@@ -320,7 +320,7 @@ flowchart TD
 - 如果 AI Agent 需要动态生成和修改 UI → 纯 Splash（这是 Canvas 的模式）
 - 如果团队协作开发 → Rust + Splash（Splash 负责 UI，Rust 负责业务逻辑）
 
-大多数生产应用使用 Rust + Splash 模式，因为实际应用几乎总是需要网络或存储。但纯 Splash 模式在 AI 生成场景中是核心模式——Canvas 中的所有应用（pomodoro、token-dashboard、music-player）都是纯 Splash（详见第27章）。
+大多数生产应用使用 Rust + Splash 模式，因为实际应用往往还需要存储、宿主资源或特定 Rust 集成。网络请求本身已经不再是必须切回 Rust 的分界线。但纯 Splash 模式在 AI 生成场景中仍然是核心模式——Canvas 中很多示例界面都可以主要用 Splash 描述；像 pomodoro、token-dashboard 这类案例基本是脚本内自洽的，而 music-player 则额外依赖 Canvas 宿主提供的音频服务（详见第27章、第30章）。
 
 值得注意的是，两种模式可以混合使用。你可以从纯 Splash 原型开始，当需要 Rust 能力时逐步迁移特定的事件处理到 Rust 侧——不需要重写整个应用。`on_click` 中的 Splash 逻辑和 `MatchEvent` 中的 Rust 逻辑可以共存。这种渐进式迁移路径意味着你不需要一开始就做出最终的架构决策。
 

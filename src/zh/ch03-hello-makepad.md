@@ -429,7 +429,7 @@ impl AppMain for App {     // 5. 生命周期（几乎不变）
 状态变化 → 调用 render() → on_render 回调执行 → UI 更新
 ```
 
-这是 Makepad 中 UI 更新的标准模式。不要直接修改 Widget 属性——修改状态，然后调用 `render()` 让 Splash 根据新状态重新构建 UI。这和 React 的 `setState → re-render` 类似。
+这是 **`on_render` 驱动模式** 中的标准循环。若只是更新现有 Widget 的文字或数值，也可以直接调用 `set_text()` 之类的命令式 API；只有在需要根据状态重新生成结构时，才需要修改状态后调用 `render()`。这和 React 的 `setState → re-render` 类似，但 Makepad 也保留了更直接的局部更新路径。
 
 ---
 
