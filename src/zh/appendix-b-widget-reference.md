@@ -64,8 +64,9 @@
 | Widget | 事件 | 样式变体 |
 |--------|------|---------|
 | `Button` | on_click / .clicked() | ButtonFlat, ButtonFlatter |
-| `CheckBox` | .changed() | CheckBoxFlat |
-| `Toggle` | .changed() | ToggleFlat |
+| `CheckBox` | on_click / .changed() | CheckBoxFlat |
+| `Toggle` | on_click / .changed() | ToggleFlat |
+| `RadioButton` | .clicked() / RadioButtonSet::selected() | RadioButtonFlat |
 | `Slider` | on_change / .changed() | SliderMinimal |
 | `DropDown` | .changed() | DropDownFlat |
 

@@ -31,7 +31,7 @@ flowchart TD
     subgraph T2["Makepad UI (主线程)"]
         U1["handle_signal()"]
         U2["出队 CanvasCommand"]
-        U3["Splash.set_text() 或 eval_with_append_source()"]
+        U3["Splash.set_text() / stream_begin() / stream_append()"]
         U4["渲染 Widget 树"]
         U5["路由按钮事件"]
     end
@@ -138,7 +138,7 @@ Makepad 的 `SignalToUI` 是一个轻量级唤醒机制——它只通知 UI 线
 
 ### 为什么每次 SplashRender 都替换整个根 Widget 树？
 
-`POST /splash` 会销毁之前的所有 Widget，用新代码重新创建完整的 Widget 树。这看起来"浪费"，但实际上：
+`POST /splash` 会让 `Splash` widget 用新代码重新求值，并替换其当前根 View。这看起来"浪费"，但实际上：
 1. Splash 的 Widget 创建和替换路径相对直接，中小型树的成本通常可控
 2. 这避免了"增量更新"的复杂性——不需要 diff 算法
 3. AI 每次输出的是完整的 Splash 代码，不是 diff

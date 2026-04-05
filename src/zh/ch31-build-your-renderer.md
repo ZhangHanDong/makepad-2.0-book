@@ -25,7 +25,7 @@ flowchart TD
         A --> C["WS 服务线程"]
         C -->|"RenderCommand"| Q["Mutex<VecDeque>"]
         Q -->|"SignalToUI"| A
-        A -->|"script_eval"| B
+        A -->|"Splash.set_text"| B
     end
     subgraph 外部
         D["WS 客户端"] <-->|"JSON"| C
@@ -99,7 +99,7 @@ pub fn start_ws_server(queue: Arc<CommandQueue>, port: u16) {
 
 ## 第三步：渲染 Splash 代码
 
-UI 线程在 `handle_signal` 中消费命令，调用 `script_eval` 将 Splash 注入 widget：
+UI 线程在 `handle_signal` 中消费命令，把收到的 Splash 文本设置到 `Splash` widget：
 
 ```rust
 impl MatchEvent for App {
@@ -112,15 +112,14 @@ impl MatchEvent for App {
         for cmd in self.drain_commands() {
             if let RenderCommand::SetSplash(code) = cmd {
                 let splash = self.ui.widget(cx, ids!(splash_panel));
-                splash.script_eval(cx, &code);
-                self.ui.redraw(cx);
+                splash.set_text(cx, &code);
             }
         }
     }
 }
 ```
 
-`script_eval` 是核心 API（详见第23章）：接收 Splash 代码字符串，VM 求值生成 widget tree，每次调用**替换**当前内容。
+这里的核心 API 是 `Splash::set_text()` / `WidgetRef::set_text()`：接收 Splash 代码字符串，内部求值后替换当前 `Splash` 的根 View。
 
 ---
 
@@ -156,7 +155,7 @@ sequenceDiagram
     participant U as UI 线程
     C->>R: {"splash": "Button{...}"}
     R->>U: RenderCommand::SetSplash
-    U->>U: script_eval + redraw
+    U->>U: set_text + 求值
     Note over U: 用户点击按钮
     U->>W: event_json via channel
     W->>C: {"event":"click","widget":"btn"}
@@ -177,7 +176,7 @@ websocat ws://127.0.0.1:9867
 < {"event":"click","widget":"btn"}
 ```
 
-精简版约 200 行 Rust，Canvas 完整实现约 800 行。核心循环相同：**收 Splash -> eval -> 渲染 -> 捕获事件 -> 回传**。进阶方向：流式渲染（详见第11章）、状态注入、截图自愈（详见第29章）、音频服务（详见第30章）。
+精简版约 200 行 Rust，Canvas 完整实现约 800 行。核心循环相同：**收 Splash -> set_text / 求值 -> 渲染 -> 捕获事件 -> 回传**。进阶方向：流式渲染（详见第11章）、状态注入、截图自愈（详见第29章）、音频服务（详见第30章）。
 
 ---
 
@@ -185,7 +184,7 @@ websocat ws://127.0.0.1:9867
 
 - 最小 AI 渲染器四个组件：Makepad App、Splash Widget、WS 服务、事件回传
 - `SignalToUI` 是跨线程唤醒 UI 线程的轻量机制
-- `script_eval` 接收 Splash 代码字符串，输出 widget tree
+- `Splash.set_text()` 接收 Splash 代码字符串，并在内部求值后替换当前内容
 - 事件回传通过 `handle_actions` 捕获点击，UID 映射到名称后发送 JSON
 - 完整 Canvas 在此基础上增加流式渲染、音频（详见第30章）、自愈循环（详见第29章）
 - 此模式不限于 AI，任何外部程序都可通过 WS 驱动 Makepad 渲染原生 UI

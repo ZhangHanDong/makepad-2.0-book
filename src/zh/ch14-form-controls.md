@@ -78,7 +78,18 @@ ToggleFlat{text: "Flat toggle"}
 
 CheckBox 和 Toggle 功能相同——一个有/无状态的开关。区别是视觉样式：CheckBox 是方块打勾，Toggle 是滑动开关。
 
-### 事件：`changed`
+### 事件：Rust 用 `changed`，Splash 用 `on_click`
+
+```splash
+CheckBox{text: "Enable notifications"
+    on_click: |checked|{
+        if checked { ui.status_label.set_text("ON") }
+        else { ui.status_label.set_text("OFF") }
+    }
+}
+```
+
+脚本侧没有单独的 `on_change` 名称；当前实现是在切换时触发 `on_click`，并把新的布尔状态作为参数传入。
 
 ```rust
 // Rust 侧
@@ -89,7 +100,7 @@ if let Some(checked) = item.check_box(cx, ids!(check)).changed(actions) {
 
 *来源：`examples/todo/src/main.rs:315`*
 
-Splash 中目前不直接支持 `on_change` 对 CheckBox。需要通过 Rust 侧的 `MatchEvent` 处理（详见第5章 Todo 示例）。
+Rust 侧如果已经在 `handle_actions` 里处理交互，`changed(actions)` 仍然是最直接的入口（详见第5章 Todo 示例）。
 
 ---
 
@@ -102,7 +113,7 @@ RadioButtonFlat{text: "Option A"}
 
 *来源：`splash.md:670-673`*
 
-RadioButton 和 CheckBox 共享相同的基础组件。在 Rust 侧通过 `changed(actions)` 检测选择变化。
+RadioButton 用法和 CheckBox 类似，但交互语义不同：它点击后只会从 `off` 切到 `on`，不会再次点击取消。Rust 侧单个按钮通常用 `.clicked(actions)` 检测；如果是一组单选项，则用 `RadioButtonSet::selected(cx, actions)` 得到被选中的索引。
 
 ---
 
@@ -136,7 +147,7 @@ Slider{text: "Brightness" min: 0. max: 100.
 }
 ```
 
-`on_change: |val|{...}` 是 Splash 中唯一使用有参数闭包的事件（详见第9章）。
+`on_change: |val|{...}` 是 Splash 中最常见的有参数闭包事件之一（详见第9章）。`TextInput` 的 `on_change` / `on_return` 在运行时也会传入当前文本。
 
 ---
 
@@ -183,9 +194,9 @@ View{width: Fill height: Fit flow: Down spacing: 12 padding: 20
 | 组件 | 输入类型 | Splash 事件 | Rust 事件 |
 |------|---------|------------|----------|
 | Button | 点击 | `on_click` | `.clicked()` |
-| CheckBox | 开/关 | — | `.changed()` |
-| Toggle | 开/关 | — | `.changed()` |
-| RadioButton | 选择 | — | `.changed()` |
+| CheckBox | 开/关 | `on_click` | `.changed()` |
+| Toggle | 开/关 | `on_click` | `.changed()` |
+| RadioButton | 选择 | — | `.clicked()` / `RadioButtonSet::selected()` |
 | Slider | 连续值 | `on_change` | `.changed()` |
 | DropDown | 列表选择 | — | `.changed()` |
 

@@ -115,7 +115,7 @@ static TODOS: LazyLock<RwLock<Vec<TodoItemData>>> =
 
 数据用 Rust 的 `Vec<TodoItemData>` 存储，通过 `static` + `RwLock` 实现全局访问。每个 Todo 项有三个字段：`text`（内容）、`tag`（标签）、`done`（是否完成）。
 
-为什么数据在 Rust 侧而不是 Splash 侧？因为在真实应用中，数据通常来自网络请求或数据库——这些操作只能在 Rust 中完成。把数据放在 Rust 侧是 Makepad 生产应用的标准模式。
+为什么数据在 Rust 侧而不是 Splash 侧？因为在真实应用中，数据往往还要和持久化、虚拟化列表、复杂事件处理以及宿主侧资源整合。Splash 现在已经能直接发 HTTP 请求，但像数据库访问、共享状态管理和高吞吐数据通路，通常仍更适合放在 Rust 侧。把数据放在 Rust 侧因此仍是 Makepad 生产应用的常见模式。
 
 ### UI 层：Splash 中的 TodoRow 模板
 
