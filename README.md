@@ -1,8 +1,8 @@
 # Makepad 2.0: From Zero to Architecture
 
-> **Makepad 2.0：从入门到架构** | A comprehensive technical book about [Makepad 2.0](https://github.com/makepad/makepad) — the Rust GUI framework designed for AI-native UI development.
+> A comprehensive technical book about [Makepad 2.0](https://github.com/makepad/makepad) — the Rust GUI framework designed for AI-native UI development.
 
-**[Read Online (Chinese)](https://zhanghandong.github.io/makepad-2.0-book/)**
+**[Read Online (Chinese)](https://zhanghandong.github.io/makepad-2.0-book/)** | [中文版 README](./README.zh.md)
 
 ---
 
