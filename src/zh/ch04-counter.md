@@ -207,7 +207,7 @@ script_eval!(cx, {
 
 *来源：`examples/counter/src/main.rs:52-55`*
 
-`script_eval!` 接收一段 Splash 代码字符串，在 VM 中执行。它是 Rust 向 Splash VM 发送指令的主要方式。
+`script_eval!` 会把花括号内的 Splash 代码经 `script!` 宏展开成一个 `ScriptMod`，然后在 VM 中执行。它是 Rust 向 Splash VM 发送指令的主要方式。
 
 Makepad 还提供了另一个宏——`script_apply_eval!`——用于直接修改特定 Widget 的属性：
 
@@ -224,7 +224,7 @@ script_apply_eval!(cx, my_widget, {
 
 **注意**：`script_eval!` 的执行是同步的——花括号内的 Splash 代码在当前帧内立即执行。不需要等待下一帧。这意味着你可以在 `script_eval!` 之后立即读取更新后的状态。
 
-`script_eval!` 的内容在编译时是字符串字面量，不参与 Rust 的类型检查。如果你写了无效的 Splash 代码（比如拼错了变量名），错误会在运行时而不是编译时出现。这是"运行时求值"的代价——灵活性换来了编译期安全性的降低。
+`script_eval!` 的内容不会进入 Rust 的类型系统。编译期宏会生成一个 `ScriptMod`，其中脚本主体以源码字符串保存，`#(...)` 注入值则单独收集到 `values`。如果你写了无效的 Splash 代码（比如拼错了变量名），错误会在运行时而不是编译时出现。这是"运行时求值"的代价——灵活性换来了编译期安全性的降低。
 
 ### 机制二：Splash → Rust（Widget 查询 `ids!`）
 

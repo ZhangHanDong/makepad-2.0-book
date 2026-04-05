@@ -56,7 +56,7 @@
 |--------|--------|---------|------|
 | `Label` | 否 | 否 | 不支持 cursor |
 | `H1`-`H4` | 否 | 否 | 标题变体 |
-| `TextInput` | 是 | 是 | 支持 on_return |
+| `TextInput` | 是 | 是 | 支持 on_return / on_change |
 | `Markdown` | 选择 | 否 | body 属性 |
 
 ## 交互组件
