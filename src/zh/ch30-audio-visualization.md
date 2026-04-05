@@ -2,7 +2,7 @@
 
 ## 为什么这很重要
 
-前两章介绍了 Canvas 架构（详见第27章）和 Agent-to-App 管线（详见第28章）。本章用一个完整的音频可视化案例，展示 Makepad 2.0 如何将音频解码、FFT 频谱分析、GPU 着色器渲染和 Splash 脚本无缝整合。这是 Canvas 内置通用能力的典型示范——音频服务不属于任何具体应用，而是所有 Splash 脚本都可以调用的基础设施。
+前两章介绍了 Canvas 架构（详见第27章）和 Agent-to-App 管线（详见第28章）。本章用一个完整的音频可视化案例，展示 Makepad 2.0 如何将音频解码、FFT 频谱分析、GPU 着色器渲染和 Splash 脚本整合起来。这里的音频能力属于 Canvas 宿主提供的共享服务：Splash 可以通过约定命名和 `on_audio()` 消费播放状态，但真正的音频加载与播放启动仍由 Canvas 命令 / HTTP 端点触发。
 
 ```mermaid
 flowchart LR
@@ -120,7 +120,7 @@ ring_radius = 0.3 + bands[band_idx] * 0.35
 
 ## music-player.splash 案例分析
 
-`tools/canvas/examples/music-player.splash` 是一个完整的音乐播放器 UI，展示了 Splash 脚本如何与 Canvas 音频服务协作：
+`tools/canvas/examples/music-player.splash` 是一个播放器界面示例，展示了 Splash 脚本如何与 Canvas 音频服务协作：
 
 ```splash
 let player = { track: 0 }
@@ -139,9 +139,9 @@ fn on_audio() {
 
 ### 关键设计模式
 
-1. **约定命名触发音频控制**：按钮命名为 `play_btn` 和 `audio_stop`，Canvas 的 `handle_actions` 自动识别并路由到 `AudioPlaybackState::toggle/stop`。
+1. **约定命名触发宿主控制**：按钮命名为 `play_btn` 和 `audio_stop` 时，Canvas 的 `handle_actions` 会把点击路由到 `AudioPlaybackState::toggle/stop`。
 2. **`on_audio` 回调**：Canvas 以约 10Hz 频率将播放状态（`_pos`、`_dur`、`_playing`）注入 Splash VM 全局变量，并调用 `on_audio` 函数更新 UI。
-3. **纯 Splash 逻辑**：曲目切换（Prev/Next）完全在 `on_click` 中处理，不需要 Rust 端参与。
+3. **示例里的 Prev/Next 只更新界面元数据**：`music-player.splash` 中这两个按钮只修改 `player.track` 和标签文字；真正加载不同音频 URL 的是外部驱动脚本 / `POST /audio/play`，不是这两个 `on_click` 本身。
 
 ```mermaid
 sequenceDiagram
@@ -188,5 +188,6 @@ SpectrumBars{
 - `AudioPlaybackState` 使用原子变量和 `try_lock` 实现音频线程与 UI 线程的无阻塞通信
 - `SpectrumAnalyzer` 对 2048 点 FFT 做 Hann 窗、对数频段映射和非对称平滑
 - `SpectrumBars` 和 `SpectrumCircular` 在 GPU shader 中实时渲染 16 频段数据
-- Splash 脚本通过约定命名（`play_btn`、`audio_stop`）和 `on_audio` 回调与音频服务协作
+- Splash 脚本通过约定命名（`play_btn`、`audio_stop`）和 `on_audio` 回调消费 Canvas 音频状态
+- 真正的音频加载 / 播放启动由 Canvas `AudioPlay` 命令或 `POST /audio/play` 触发，示例里的 Prev/Next 主要负责更新界面上的曲目信息
 - 可视化着色器可通过 `draw_bg +:` 在 Splash 中自由扩展（详见第19章）

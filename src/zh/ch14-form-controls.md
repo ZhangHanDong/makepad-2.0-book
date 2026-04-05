@@ -49,7 +49,11 @@ ButtonFlat{text: "Custom"
 | 模式 | Splash | Rust |
 |------|--------|------|
 | 点击 | `on_click: \|\|{...}` | `button.clicked(actions)` |
+| 按下 | `on_press: \|\|{...}` | `button.pressed(actions)` |
 | 程序触发 | `ui.btn.on_click()` | — |
+| 程序触发按下 | `ui.btn.on_press()` | — |
+
+如果你需要“手指 / 鼠标一按下就反馈”，用 `on_press`；如果你需要“按下后松开且仍在按钮区域内才算完成”，用 `on_click`。
 
 带图标的按钮：
 
@@ -160,7 +164,7 @@ DropDownFlat{labels: ["Option A" "Option B" "Option C"]}
 
 *来源：`splash.md:687-688`*
 
-DropDown 的 `labels` 是一个字符串数组。选择变化通过 Rust 侧处理。
+DropDown 的 `labels` 是一个字符串数组。选择变化目前主要通过 Rust 侧处理，常见入口是 `.changed(actions)`；当前实现也提供了 `.selected(actions)` 这个等价别名。
 
 ---
 
@@ -198,6 +202,6 @@ View{width: Fill height: Fit flow: Down spacing: 12 padding: 20
 | Toggle | 开/关 | `on_click` | `.changed()` |
 | RadioButton | 选择 | — | `.clicked()` / `RadioButtonSet::selected()` |
 | Slider | 连续值 | `on_change` | `.changed()` |
-| DropDown | 列表选择 | — | `.changed()` |
+| DropDown | 列表选择 | — | `.changed()` / `.selected()` |
 
 下一章讲解列表组件——PortalList 虚拟化列表和 FlatList（详见第15章：列表与虚拟化）。

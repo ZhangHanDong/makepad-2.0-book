@@ -63,12 +63,12 @@
 
 | Widget | 事件 | 样式变体 |
 |--------|------|---------|
-| `Button` | on_click / .clicked() | ButtonFlat, ButtonFlatter |
+| `Button` | on_click / on_press / .clicked() / .pressed() | ButtonFlat, ButtonFlatter |
 | `CheckBox` | on_click / .changed() | CheckBoxFlat |
 | `Toggle` | on_click / .changed() | ToggleFlat |
 | `RadioButton` | .clicked() / RadioButtonSet::selected() | RadioButtonFlat |
 | `Slider` | on_change / .changed() | SliderMinimal |
-| `DropDown` | .changed() | DropDownFlat |
+| `DropDown` | .changed() / .selected() | DropDownFlat |
 
 ## 列表
 

@@ -10,7 +10,7 @@ Makepad 2.0 的 Widget 系统是可扩展的——你可以用 Rust 创建新的
 
 ```mermaid
 flowchart TD
-    A["#[derive(Widget)]"] --> B["实现 Widget trait"]
+    A["#[derive(Script, ScriptHook, Widget)]"] --> B["实现 Widget trait"]
     B --> C["draw_walk() — 渲染逻辑"]
     B --> D["handle_event() — 事件处理"]
     A --> E["在 script_mod! 中注册"]
@@ -74,7 +74,7 @@ struct MyChart {
 }
 ```
 
-- `#[derive(Script, ScriptHook, Widget)]`——让结构体可以作为 Widget 使用
+- `#[derive(Script, ScriptHook, Widget)]`——让结构体既能作为 Widget 工作，也能被 Splash 运行时注册和驱动
 - `#[deref] view: View`——委托基础的布局和绘制给内部的 View
 - `#[rust]`——标记非 Splash 字段（不会出现在 Splash DSL 中）
 
@@ -208,7 +208,7 @@ Widget 在 `draw_walk` 中读取数据并渲染。数据修改后调用 `redraw(
 
 | 概念 | 说明 |
 |------|------|
-| `#[derive(Widget)]` | 让 Rust 结构体成为 Widget |
+| `#[derive(Script, ScriptHook, Widget)]` | 让 Rust 结构体既成为 Widget，又能被 Splash 注册与驱动 |
 | `draw_walk()` | Widget 的渲染入口 |
 | `handle_event()` | Widget 的事件入口 |
 | `#[deref] view: View` | 委托基础功能给内部 View |

@@ -98,11 +98,14 @@ TextInputFlat{width: Fill height: Fit empty_text: "Flat style"}
 
 | 事件 | 触发时机 | Splash API | Rust API |
 |------|---------|-----------|---------|
-| 回车提交 | 用户按 Enter | `on_return: \|\|{...}` | `.returned(actions)` |
+| 内容变化 | 用户编辑文本 | `on_change: \|text\|{...}` | `.changed(actions)` |
+| 回车提交 | 用户按 Enter | `on_return: \|\|{...}` / `\|text\|{...}` | `.returned(actions)` |
 | 读取文字 | 任意时刻 | `ui.input.text()` | `.text()` |
 | 设置文字 | 任意时刻 | `ui.input.set_text("")` | `.set_text(cx, "")` |
 
-`on_return` 是 TextInput 最重要的事件——用户按回车时触发，常用于搜索框和表单提交（详见第9章）。
+`on_return` 是 TextInput 最重要的事件——用户按回车时触发，常用于搜索框和表单提交（详见第9章）。Rust 侧的 `.returned(actions)` 还会一并返回 `KeyModifiers`，便于区分普通回车和带修饰键的提交。
+
+`on_change` 则适合做实时校验、搜索建议和即时预览。脚本侧会直接收到当前文本；Rust 侧用 `.changed(actions)` 取得更新后的字符串。
 
 ### TextInput 样式
 

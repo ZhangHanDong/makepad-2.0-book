@@ -179,4 +179,4 @@ GlassPanel 的模糊效果是 GPU shader 级别的——在它后面的内容会
 | GlassPanel | 毛玻璃面板 | 低 |
 | Dock | 可拖拽面板系统 | 高 |
 
-下一章讲解如何创建自定义 Widget——`#[derive(Widget)]`、ScriptHook 和 Widget 生命周期（详见第17章：自定义 Widget）。
+下一章讲解如何创建自定义 Widget——`#[derive(Script, ScriptHook, Widget)]`、Widget trait 和 Widget 生命周期（详见第17章：自定义 Widget）。
