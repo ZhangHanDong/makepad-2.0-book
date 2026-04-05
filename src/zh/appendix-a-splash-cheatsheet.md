@@ -3,8 +3,8 @@
 ## 基本语法
 
 ```splash
-key: value                          // 属性赋值（空格分隔）
-key: Type{ prop1: val1 prop2: val2 } // 嵌套对象
+key: value                          // 属性赋值（空格或逗号分隔）
+key: Type{ prop1: val1 prop2: val2 } // 嵌套对象（逗号可选）
 key +: { prop: val }                // 合并运算符
 draw_bg.color: #xf00                // 点路径简写
 my_btn := Button{ text: "Click" }   // 命名子组件（:=）

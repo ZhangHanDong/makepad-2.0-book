@@ -85,7 +85,7 @@ impl MatchEvent for App {
 | `apply_over` + `live!{}` | `script_eval!{}` | 运行时修改 UI |
 | `LiveHook` trait | `ScriptHook` derive | 生命周期钩子 |
 | `#[live]` 属性 | `#[live]` 属性 | 不变 |
-| 逗号分隔属性 | 空格分隔属性 | 语法简化 |
+| 逗号分隔属性 | 空格分隔（逗号仍可用） | 逗号被当作空白，新代码推荐省略 |
 | `<Widget>` 尖括号 | `Widget{}` 花括号 | 统一为花括号 |
 
 ## 迁移步骤

@@ -424,7 +424,9 @@ fn is_separator(c: char) -> bool {
 
 *来源：`platform/script/src/tokenizer.rs:618-619`*
 
-逗号和分号被识别为 `Separator` token，但它们**不是必需的**。在 `Whitespace` 状态下，遇到新的标识符就自动开始新属性，无需先看到分隔符：
+逗号和分号被识别为 `Separator` token，但它们**不是必需的**——tokenizer 将它们当作空白处理。这意味着你可以写逗号也可以不写，两种风格在语法上完全等价。实际上，从 Makepad 1.x `live_design!` 迁移过来的代码大量使用逗号，Splash 继续接受它们以保持向后兼容。当前的指导是"匹配周围代码风格"——在新项目中推荐省略逗号（更简洁），在已有项目中保持一致即可。
+
+在 `Whitespace` 状态下，遇到新的标识符就自动开始新属性，无需先看到分隔符：
 
 ```rust
 State::Whitespace => {
