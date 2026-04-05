@@ -1,0 +1,19 @@
+[book]
+title = "Makepad 2.0: From Zero to Architecture"
+authors = ["Alex Zhang"]
+language = "zh"
+multilingual = true
+src = "src/zh"
+
+[build]
+build-dir = "book"
+
+[output.html]
+default-theme = "coal"
+preferred-dark-theme = "coal"
+git-repository-url = ""
+additional-js = ["mermaid.min.js", "mermaid-init.js"]
+
+[output.html.fold]
+enable = true
+level = 1
