@@ -83,7 +83,7 @@ pub struct ScriptVm {
 ```
 
 每个编译单元对应一个 `ScriptBody`，包含 tokenizer、parser、scope 对象和 checkpoint。
-`ScriptSource` 区分 `Mod`（完整模块）与 `Streaming`（LLM 流式输入）两种来源。
+`ScriptSource` 类型里同时定义了 `Mod` 与 `Streaming` 变体；但当前 `eval_with_append_source()` 这条流式 UI 主路径实际是在复用 `ScriptSource::Mod` 对应的 body，并在其上做增量 tokenize / parse。
 
 ## 23.5 执行线程与值表示
 
@@ -131,7 +131,7 @@ flowchart TD
     RENDER --> |等待新 token| LLM
 ```
 
-`checkpoint` 保存 tokenizer 位置、parser 状态栈、字节码偏移量。
+`checkpoint` 保存的是 parser 侧的恢复点，用于撤销上一次 auto-close 并继续解析；tokenizer 的增量位置则通过 `source_len` 和已缓存 token 序列管理。
 新代码段从上次停止处继续解析，无需重解析整个文件。也是第11章的深入主题。
 
 ## 23.8 与 Shader 编译的分岔

@@ -136,7 +136,7 @@ Slider{text: "Volume" min: 0. max: 100. default: 50.
 
 ### on_render：渲染回调
 
-`on_render` 和前三个不同——它不是用户触发的事件，而是**程序触发的渲染回调**。当你调用 `ui.view_name.render()` 时，这个 View 的 `on_render` 闭包被执行，闭包中的 Widget 定义替换 View 之前的子组件。
+`on_render` 和前三个不同——它不是用户触发的事件，而是**程序触发的渲染回调**。当你调用 `ui.view_name.render()` 时，这个 View 的 `on_render` 闭包被执行，返回的 Widget 定义会以 reload 方式重新应用到该 View。
 
 ```splash
 main_view := View{width: Fill height: Fit flow: Down
@@ -156,7 +156,7 @@ Button{text: "Go Home" on_click: ||{ state.page = "home"  ui.main_view.render() 
 Button{text: "Settings" on_click: ||{ state.page = "settings"  ui.main_view.render() }}
 ```
 
-`on_render` 实现了**条件渲染**——根据状态的不同值，生成不同的 Widget 树。这是 Splash 中 `if/else` 在 UI 层面的应用。每次 `render()` 被调用，`on_render` 中的代码完全重新执行，之前的 Widget 被销毁，新的 Widget 被创建。
+`on_render` 实现了**条件渲染**——根据状态的不同值，生成不同的 Widget 树。这是 Splash 中 `if/else` 在 UI 层面的应用。每次 `render()` 被调用，`on_render` 中的代码都会重新执行，并把新的结果重新应用到该 View；同名 / 同 id 的子节点会尽量复用，缺失的子节点则会被移除。
 
 **`on_render` 的典型用途**：
 
@@ -169,13 +169,13 @@ Button{text: "Settings" on_click: ||{ state.page = "settings"  ui.main_view.rend
 | 方式 | 适用场景 | 优势 | 限制 |
 |------|---------|------|------|
 | `set_text()` | 更新已有 Widget 的文字 | 快速，不重建 Widget | 只能改文字，不能增删 Widget |
-| `on_render` | 根据状态动态生成 Widget | 可以条件渲染、循环生成 | 每次重建所有子 Widget |
+| `on_render` | 根据状态动态生成 Widget | 可以条件渲染、循环生成 | 会重新应用整块子树，结构变化成本更高 |
 
 经验法则：如果只是更新文字或颜色，用 `set_text()`。如果需要根据状态显示/隐藏组件或改变组件数量，用 `on_render`。
 
 两者也可以结合使用。比如一个仪表板，大部分内容用 `set_text()` 更新（效率高），但"当前页面"的切换用 `on_render`（需要替换整个 Widget 子树）。pomodoro 就是这种混合模式——`refresh()` 函数用 `set_text()` 更新时间标签和按钮文字，而不重建整个 UI。
 
-`on_render` 的另一个重要用途是**动态列表**。在第5章的纯 Splash Todo 中，`on_render` 内的 `while` 循环根据数组长度生成 N 个列表项。每次添加或删除 Todo 后调用 `render()`，列表重新生成。这比手动增删单个 Widget 简单得多——代价是每次全量重建，性能上限较低。对于小规模列表（<100 项），这个代价可以接受。大规模列表需要 PortalList 虚拟化（详见第15章）。
+`on_render` 的另一个重要用途是**动态列表**。在第5章的纯 Splash Todo 中，`on_render` 内的 `while` 循环根据数组长度生成 N 个列表项。每次添加或删除 Todo 后调用 `render()`，这段列表定义会重新执行，并重新应用到目标 View。这比手动增删单个 Widget 简单得多——代价是列表结构变化越大，更新成本越高。大规模列表仍然需要 PortalList 虚拟化（详见第15章）。
 
 **`on_render` 和 `on_startup` 的区别**：`on_startup` 在应用启动时执行一次，常用于初始化（如第一次调用 `render()`）。`on_render` 在每次 `render()` 调用时执行，可以执行多次。两者都是无参数闭包。
 
@@ -419,7 +419,7 @@ content := View{on_render: ||{
 Button{on_click: ||{ state.condition = true  ui.content.render() }}
 ```
 
-这是 Splash 中实现"显示/隐藏"的标准方式——不用 `set_visible`（Splash 不支持），而是用条件渲染。
+这是当前纯 Splash 中实现"显示/隐藏"的标准方式——与其依赖未统一暴露的 `set_visible()` 脚本接口，不如直接用条件渲染表达结构变化。
 
 ---
 
@@ -438,7 +438,7 @@ Button{on_click: ||{ state.condition = true  ui.content.render() }}
 
 1. **所有事件回调最终都要更新 UI**——通过 `set_text()` 或 `render()`
 2. **闭包可以访问外层变量**——`state`、`ui`、全局函数
-3. **`on_render` 是条件渲染的唯一方式**——Splash 没有 `set_visible`
+3. **在当前纯 Splash 里，条件替换整块子树通常用 `on_render` 完成**——通用脚本侧 `set_visible()` 不是稳定的通用 API
 4. **在 `Splash{}` / Canvas 环境里，可用 `fn tick()` 获得约 1 秒周期回调**
 
 下一章将讲解 Splash 的状态机和动画系统——`mod.state`、Animator、hover/pressed 效果（详见第10章：状态与动画）。

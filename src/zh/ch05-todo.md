@@ -85,17 +85,17 @@ SolidView{width: Fill height: Fit draw_bg.color: #x1a1a2e
 
 这就是"数据驱动 UI"的本质——UI 是数据的投影。你不需要手动创建、移动、删除 Widget，只需要修改数据然后重新渲染。
 
-和上一章的 Counter 对比，关键的新模式是 `on_render` 中的 `while` 循环。Counter 的 `on_render` 只生成一个 Label；Todo 的 `on_render` 根据数组长度生成 N 个 `RoundedView`。每次 `render()` 被调用，之前的 Widget 会被销毁，新的 Widget 根据当前数据重新创建。这种"每次全量重建"的方式简单但有性能上限——当列表超过几百项时，重建所有 Widget 的开销会变得明显。
+和上一章的 Counter 对比，关键的新模式是 `on_render` 中的 `while` 循环。Counter 的 `on_render` 只生成一个 Label；Todo 的 `on_render` 根据数组长度生成 N 个 `RoundedView`。每次 `render()` 被调用，这段列表定义都会重新执行，并以 reload 方式重新应用到 `list_view`。这种"整块子树重新应用"的方式简单但有性能上限——当列表超过几百项时，结构更新的开销会变得明显。
 
 纯 Splash 版本并非完全不能删除。当前 Splash 数组已经支持 `remove(index)`，因此理论上可以在纯 Splash 中实现删除；只是它仍然没有 `splice` 这类更丰富的数组编辑 API。完整版 Todo 仍把数据放在 Rust 侧，主要是为了和 `PortalList` 虚拟化、Rust 事件处理以及真实数据源整合。
 
-纯 Splash 版本的价值在于**快速原型**和 **AI 生成**。AI Agent 可以在几秒内生成上面的代码，用户立即看到一个可交互的 Todo 原型。当需要添加持久化、同步、删除等高级功能时，再迁移到 Rust + Splash 模式。这种渐进式开发路径（详见第4章）是 Makepad 的核心工作流。
+纯 Splash 版本的价值在于**快速原型**和 **AI 生成**。AI Agent 可以很快生成上面的代码，用户随后就能看到一个可交互的 Todo 原型。当需要添加持久化、同步、删除等高级功能时，再迁移到 Rust + Splash 模式。这种渐进式开发路径（详见第4章）是 Makepad 的核心工作流。
 
 ---
 
 ## 完整版：`examples/todo/` 分析
 
-纯 Splash 版本适合小规模场景。当 Todo 项数超过几十个时，每次 `on_render` 都重建所有 Widget 会变慢。这就是 `examples/todo/` 中使用 `PortalList` 的原因——它只渲染可见区域内的项目（虚拟化），即使有上千个 Todo 项也能流畅滚动。
+纯 Splash 版本适合小规模场景。当 Todo 项数超过几十个时，每次 `on_render` 都重新生成并应用整段列表子树，开销会逐渐明显。这就是 `examples/todo/` 中使用 `PortalList` 的原因——它只渲染可见区域内的项目（虚拟化），即使有上千个 Todo 项也能流畅滚动。
 
 ### 数据层：Rust 中的 Todo 数据
 
@@ -397,13 +397,13 @@ function TodoApp() {
 |------|------------------------|-------|
 | 列表渲染 | `PortalList` + `draw_walk` | `Array.map()` + virtual DOM diff |
 | 虚拟化 | 原生支持（PortalList） | 需要 `react-window` 等三方库 |
-| 运行时修改 UI | 可以（修改 Splash 即时生效） | 需要重新编译/打包 |
+| 运行时修改 UI | 可以（修改 Splash 后可直接重新求值） | 需要重新编译/打包 |
 | AI 修改 UI | Splash 代码可以被 AI 动态替换 | 需要构建工具链参与 |
 | 性能 | GPU 渲染，零 GC 暂停 | DOM 操作，JavaScript GC |
 
-Makepad 的核心优势不在于"Todo 写起来更简单"——两者的代码量和复杂度相当。优势在于**运行时能力**：你可以在应用运行时修改 Splash 中的 `TodoRow` 模板，立即看到所有列表项的样式变化，不需要重新编译。这在 React 中是不可能的——JSX 是编译时的。
+Makepad 的核心优势不在于"Todo 写起来更简单"——两者的代码量和复杂度相当。优势在于**运行时能力**：你可以在应用运行时修改 Splash 中的 `TodoRow` 模板，并在重新求值后看到所有列表项的样式变化，不需要重新编译。这在 React 中是不可能的——JSX 是编译时的。
 
-对于 AI 生成场景，这个差异更加显著。假设你想让 AI 重新设计 Todo 列表的外观——添加渐变背景、改变字体、调整布局。在 React 中，AI 需要生成 JSX + CSS，经过 Babel/Webpack 编译，生成新的 bundle，浏览器重新加载——即使用 Vite 的 HMR，这个链路也是秒级的。在 Makepad 中，AI 通过 WebSocket 发送新的 Splash 代码（新的 `TodoRow` 模板），应用立即渲染——延迟是毫秒级的（详见第11章：流式求值）。
+对于 AI 生成场景，这个差异更加显著。假设你想让 AI 重新设计 Todo 列表的外观——添加渐变背景、改变字体、调整布局。在 React 中，AI 需要生成 JSX + CSS，经过 Babel/Webpack 编译，生成新的 bundle，浏览器重新加载；在 Makepad 中，AI 可以把新的 Splash 代码（新的 `TodoRow` 模板）直接发给运行时并重新求值，反馈链路更短（详见第11章：流式求值）。
 
 更根本的是，React 的 Todo 和它的构建工具链是耦合的——你不能在没有 Node.js、npm、Webpack 的环境中运行它。Makepad 的 Todo 是一个独立的原生二进制文件，不需要任何运行时环境。Splash 脚本内嵌在 Rust 代码中，在任何支持的平台（macOS、Windows、Linux、Android、iOS、WASM）上编译一次就能运行。
 

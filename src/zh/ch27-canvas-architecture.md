@@ -97,6 +97,7 @@ Canvas 同时支持 WebSocket 和 HTTP：
 | HTTP 端点 | 对应命令 |
 |-----------|---------|
 | `POST /splash` body=code | `SplashRender` |
+| `POST /splash/stream` 空 body | `SplashStreamBegin` |
 | `POST /splash/stream` body=chunk | `SplashStreamAppend` |
 | `POST /splash/end` | `SplashStreamEnd` |
 | `POST /clear` | 清空画布 |
@@ -135,14 +136,14 @@ Widget 树渲染
 
 Makepad 的 `SignalToUI` 是一个轻量级唤醒机制——它只通知 UI 线程"有新东西"，不传递数据。数据通过共享的 `Mutex<VecDeque>` 传递。这比 `mpsc::channel` 更适合 Makepad 的事件循环模型——UI 线程在 `handle_signal` 中一次性取出所有命令，而不是逐条轮询 channel。
 
-### 为什么每次 SplashRender 都重建整个 Widget 树？
+### 为什么每次 SplashRender 都替换整个根 Widget 树？
 
 `POST /splash` 会销毁之前的所有 Widget，用新代码重新创建完整的 Widget 树。这看起来"浪费"，但实际上：
-1. Splash 的 Widget 创建非常快（< 1ms 对于几百个 Widget）
+1. Splash 的 Widget 创建和替换路径相对直接，中小型树的成本通常可控
 2. 这避免了"增量更新"的复杂性——不需要 diff 算法
 3. AI 每次输出的是完整的 Splash 代码，不是 diff
 
-**重要：不要在循环中调用 `POST /splash`**。每次 POST 都重建 Widget 树+重新注册 uid_map+全量重绘。如果每 3 秒 POST 一次，CPU 会飙到 100%。正确做法是 POST 一次，让 Canvas 中 `Splash` widget 提供的 `fn tick()` 和 `on_click` 驱动后续更新。
+**重要：不要在循环中调用 `POST /splash`**。每次 POST 都会替换根 Widget 树、重新注册 `uid_map`，并触发一次全量重绘。若周期性反复这样做，布局和重绘开销会持续放大。正确做法是 POST 一次，让 Canvas 中 `Splash` widget 提供的 `fn tick()` 和 `on_click` 驱动后续更新。
 
 ### 为什么只能同时渲染一个应用？
 

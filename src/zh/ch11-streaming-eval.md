@@ -114,14 +114,14 @@ pub enum CanvasCommand {
 
 **阶段 2：Append**（多次调用）— 每次追加一段代码片段。Canvas 将新片段拼接到已有代码后面，然后调用 `eval_with_append_source` 进行增量求值。每次 Append 后用户都能看到当前代码对应的 UI。
 
-**阶段 3：End** — 标记代码输出完成。Canvas 执行最后一次求值，关闭流式模式。
+**阶段 3：End** — 标记代码输出完成。当前 Canvas 实现主要在 `End` 时收尾并记录最终代码；真正的增量求值发生在每次 `Append`。
 
 对应的 HTTP 端点：
 
 | 端点 | 对应阶段 |
 |------|---------|
-| `POST /splash/stream` + body | Begin + 第一次 Append |
-| `POST /splash/stream` + body | 后续 Append |
+| `POST /splash/stream`（空 body） | Begin |
+| `POST /splash/stream` + body | Append |
 | `POST /splash/end` | End |
 
 ---
@@ -338,6 +338,6 @@ t=400ms AI: "\n}"
 
 1. **流式求值是语法设计的结果**——Splash 的无分隔符、花括号嵌套设计使 auto-close 成为可能
 2. **用户体验是"观看构建"而非"等待结果"**——相同的总时间，不同的感知
-3. **这为 AI 生成 UI 提供了毫秒级反馈**——Canvas 的 Agent-to-App 管线的技术基础
+3. **这为 AI 生成 UI 提供了更短的反馈链路**——Canvas 的 Agent-to-App 管线的技术基础
 
 Part II（Splash 语言篇）到此完成。下一步进入 Part III（Widget 体系篇），系统讲解 Makepad 的布局引擎、组件库和自定义 Widget 机制。

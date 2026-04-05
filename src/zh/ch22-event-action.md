@@ -230,7 +230,7 @@ Rust 层的 Event/Action 系统与 Splash 脚本事件通过 `ScriptHook` 桥接
 |----------|-----------|----------|
 | `Event::MouseDown` -> `Hit::FingerDown` | `on_click` 回调 | ScriptHook 在 handle_event 中触发脚本求值 |
 | `cx.action()` | `mod.state` 更新 | 脚本状态变更后触发 `redraw()` |
-| `Event::Draw` | `on_render` 回调 | DrawEvent 驱动脚本重绘 |
+| `ui.view.render()` 脚本调用 | `on_render` 回调 | `View::script_call(render)` 异步执行脚本并以 reload 方式应用结果 |
 
 ## 模式提炼
 
