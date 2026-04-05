@@ -40,11 +40,11 @@ MyCard{title.text: "New"}           // 模板实例化+覆写
 | 事件 | 语法 | 触发 |
 |------|------|------|
 | 点击 | `on_click: \|\|{...}` | Button 点击 |
-| 回车 | `on_return: \|\|{...}` | TextInput 回车 |
-| 值变 | `on_change: \|val\|{...}` | Slider 拖动 |
+| 回车 | `on_return: \|\|{...}` / `\|text\|{...}` | TextInput 回车 |
+| 值变 | `on_change: \|val\|{...}` | Slider / TextInput 值变化 |
 | 渲染 | `on_render: \|\|{...}` | `render()` 调用 |
 | 启动 | `on_startup: \|\|{...}` | 应用启动 |
-| 定时 | `fn tick() {...}` | 每秒自动 |
+| 定时 | `fn tick() {...}` | `Splash{}` / Canvas 中约 1 秒周期调用 |
 
 ## Widget API
 
@@ -70,7 +70,7 @@ net.http_request(req) do net.HttpEvents{
 
 方法：`GET` / `POST` / `PUT` / `DELETE` / `HEAD` / `PATCH`
 流式：`is_streaming: true` + `on_stream` / `on_complete`
-HTML 解析：`html_string.parse_html().select("css selector")`
+HTML 解析：`html_string.parse_html().query("css selector")`
 
 ## 八条必记规则
 

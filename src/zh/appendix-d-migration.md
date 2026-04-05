@@ -91,9 +91,9 @@ impl MatchEvent for App {
 ## 迁移步骤
 
 1. **替换宏**：`live_design!` → `script_mod!`
-2. **替换语法**：`<Widget>` → `Widget{}`，逗号 → 空格，`=` → `:`
+2. **替换语法**：`<Widget>` → `Widget{}`，属性间通常省略逗号，`=` → `:`
 3. **替换命名**：`name =` → `name :=`
 4. **替换主题**：`(THEME_COLOR)` → `theme.color`
 5. **替换事件**：`apply_over` + `live!` → `script_eval!`
 6. **替换查找**：`id!(name)` → `ids!(name)`
-7. **添加脚本能力**：利用 `on_click`、`fn tick()`、`on_render` 等新特性
+7. **添加脚本能力**：利用 `on_click`、`on_render`，以及在 Canvas / `Splash{}` 环境中可用的 `fn tick()` 等能力

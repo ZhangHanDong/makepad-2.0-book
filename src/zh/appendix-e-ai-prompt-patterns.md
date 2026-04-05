@@ -26,7 +26,7 @@
 ```
 创建一个 {工具名} 应用。
 - 状态定义用 let state = {...}
-- 定时器用 fn tick()
+- Canvas 定时器用 fn tick()
 - 交互用 on_click: ||{...}
 - UI 更新用 refresh() + set_text()
 ```
@@ -90,7 +90,7 @@ let state = { ... }
 
 // 2. 辅助函数
 fn refresh() { ... }
-fn tick() { ... }  // 如需定时器
+fn tick() { ... }  // Canvas / Splash widget 中如需定时器
 
 // 3. 模板定义（如需复用）
 let CardTemplate = RoundedView{ ... }

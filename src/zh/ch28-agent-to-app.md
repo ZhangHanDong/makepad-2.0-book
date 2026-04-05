@@ -40,8 +40,8 @@ curl -s "http://127.0.0.1:$PORT/ping"  # {"ok":true}
 
 Agent 根据用户的自然语言描述生成 Splash 代码。关键约束：
 
-1. **遵守 Splash 语法**——无逗号、`height: Fit`、`#x` 颜色前缀（详见第6-8章）
-2. **包含完整应用逻辑**——状态、事件处理、`fn tick()`
+1. **遵守 Splash 语法**——属性间通常省略逗号、`height: Fit`、`#x` 颜色前缀（详见第6-8章）
+2. **包含完整应用逻辑**——状态、事件处理，以及在 Canvas 中可选的 `fn tick()`
 3. **不依赖外部资源**——Canvas 无法加载外部图片
 
 ### 阶段三：推送到 Canvas
@@ -64,7 +64,7 @@ Agent 可以修改代码并重新推送。同名应用原地更新。
 
 | 应用 | 类型 | 关键特性 | 来源 |
 |------|------|---------|------|
-| pomodoro | 计时器 | `fn tick()` + 6 按钮 | `examples/pomodoro.splash` |
+| pomodoro | 计时器 | Canvas `fn tick()` + 6 按钮 | `examples/pomodoro.splash` |
 | token-dashboard | 仪表板 | 纯展示 + 模板复用 | `examples/token-dashboard.splash` |
 | music-player | 播放器 | `fn on_audio()` + 频谱 | `examples/music-player.splash` |
 | claude-monitor | 监控 | 定时刷新 + 多面板 | `examples/claude-monitor.splash` |
@@ -91,7 +91,7 @@ Agent 可以修改代码并重新推送。同名应用原地更新。
 
 ### 模式一：POST 一次，Splash 内部驱动
 
-不要循环 POST。POST 一次后，`on_click` 和 `fn tick()` 驱动所有后续交互。
+不要循环 POST。POST 一次后，`on_click` 和 Canvas 中可选的 `fn tick()` 驱动所有后续交互。
 
 ### 模式二：Agent 只在需要时介入
 

@@ -218,7 +218,7 @@ script_apply_eval!(cx, my_widget, {
 });
 ```
 
-`script_apply_eval!` 和 `script_eval!` 的区别：`script_eval!` 执行任意 Splash 代码（可以访问 `mod.state`、调用函数），`script_apply_eval!` 只能 patch 一个具体 Widget 的属性。`script_apply_eval!` 有一个重要限制：**DSL 常量（如 `Fill`、`Fit`、`Right`、`Center`）在运行时不可用**——只能使用数字值和通过 `#(rust_expr)` 插值的 Rust 变量。
+`script_apply_eval!` 和 `script_eval!` 的区别：`script_eval!` 执行任意 Splash 代码（可以访问 `mod.state`、调用函数），`script_apply_eval!` 只能 patch 一个具体 Widget 的属性。它更像"运行时属性补丁"而不是完整脚本环境：动态值通常通过 `#(rust_expr)` 注入；部分枚举/常量也可以直接写（例如现有代码中的 `cursor: Hand`），但可用范围取决于具体属性和运行时类型。
 
 **使用场景**：用户交互后需要更新 UI 状态——修改计数器、切换页面、加载数据后刷新显示。
 

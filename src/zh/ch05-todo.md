@@ -87,7 +87,7 @@ SolidView{width: Fill height: Fit draw_bg.color: #x1a1a2e
 
 和上一章的 Counter 对比，关键的新模式是 `on_render` 中的 `while` 循环。Counter 的 `on_render` 只生成一个 Label；Todo 的 `on_render` 根据数组长度生成 N 个 `RoundedView`。每次 `render()` 被调用，之前的 Widget 会被销毁，新的 Widget 根据当前数据重新创建。这种"每次全量重建"的方式简单但有性能上限——当列表超过几百项时，重建所有 Widget 的开销会变得明显。
 
-纯 Splash 版本的另一个限制是没有删除功能。要实现删除，你需要能在数组中移除元素——Splash 目前的数组操作不支持 `splice` 或 `remove`。这就是为什么完整版 Todo 把数据放在 Rust 侧的 `Vec<TodoItemData>` 中——Rust 的 `Vec::remove()` 可以高效地删除任意位置的元素。
+纯 Splash 版本并非完全不能删除。当前 Splash 数组已经支持 `remove(index)`，因此理论上可以在纯 Splash 中实现删除；只是它仍然没有 `splice` 这类更丰富的数组编辑 API。完整版 Todo 仍把数据放在 Rust 侧，主要是为了和 `PortalList` 虚拟化、Rust 事件处理以及真实数据源整合。
 
 纯 Splash 版本的价值在于**快速原型**和 **AI 生成**。AI Agent 可以在几秒内生成上面的代码，用户立即看到一个可交互的 Todo 原型。当需要添加持久化、同步、删除等高级功能时，再迁移到 Rust + Splash 模式。这种渐进式开发路径（详见第4章）是 Makepad 的核心工作流。
 

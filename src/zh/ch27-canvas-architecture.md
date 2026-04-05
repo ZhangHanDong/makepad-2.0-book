@@ -142,7 +142,7 @@ Makepad 的 `SignalToUI` 是一个轻量级唤醒机制——它只通知 UI 线
 2. 这避免了"增量更新"的复杂性——不需要 diff 算法
 3. AI 每次输出的是完整的 Splash 代码，不是 diff
 
-**重要：不要在循环中调用 `POST /splash`**。每次 POST 都重建 Widget 树+重新注册 uid_map+全量重绘。如果每 3 秒 POST 一次，CPU 会飙到 100%。正确做法是 POST 一次，让 Splash 内部的 `fn tick()` 和 `on_click` 驱动后续更新。
+**重要：不要在循环中调用 `POST /splash`**。每次 POST 都重建 Widget 树+重新注册 uid_map+全量重绘。如果每 3 秒 POST 一次，CPU 会飙到 100%。正确做法是 POST 一次，让 Canvas 中 `Splash` widget 提供的 `fn tick()` 和 `on_click` 驱动后续更新。
 
 ### 为什么只能同时渲染一个应用？
 
@@ -160,7 +160,7 @@ Canvas 的设计是"单画布"——同一时刻只有一个 Splash 应用在运
 Canvas 的 Rust 代码不包含任何业务逻辑。所有逻辑在 Splash 代码中：
 - 状态 → `let state = {...}`
 - 交互 → `on_click: ||{...}`
-- 定时器 → `fn tick()`
+- 定时器 → Canvas 中的 `fn tick()`
 - UI 更新 → `refresh()` / `on_render`
 
 这种设计让 AI Agent 可以完全控制应用行为——只需要发送不同的 Splash 代码，不需要修改 Canvas 的 Rust 代码。
