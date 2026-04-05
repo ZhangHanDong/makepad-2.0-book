@@ -207,7 +207,18 @@ script_eval!(cx, {
 
 *来源：`examples/counter/src/main.rs:52-55`*
 
-`script_eval!` 接收一段 Splash 代码字符串，在 VM 中执行。它是 Rust 修改 Splash 状态和触发 UI 更新的唯一方式。
+`script_eval!` 接收一段 Splash 代码字符串，在 VM 中执行。它是 Rust 向 Splash VM 发送指令的主要方式。
+
+Makepad 还提供了另一个宏——`script_apply_eval!`——用于直接修改特定 Widget 的属性：
+
+```rust
+let color = vec4(1.0, 0.0, 0.0, 1.0);
+script_apply_eval!(cx, my_widget, {
+    draw_bg +: { color: #(color) }
+});
+```
+
+`script_apply_eval!` 和 `script_eval!` 的区别：`script_eval!` 执行任意 Splash 代码（可以访问 `mod.state`、调用函数），`script_apply_eval!` 只能 patch 一个具体 Widget 的属性。`script_apply_eval!` 有一个重要限制：**DSL 常量（如 `Fill`、`Fit`、`Right`、`Center`）在运行时不可用**——只能使用数字值和通过 `#(rust_expr)` 插值的 Rust 变量。
 
 **使用场景**：用户交互后需要更新 UI 状态——修改计数器、切换页面、加载数据后刷新显示。
 
@@ -293,17 +304,19 @@ flowchart TD
 
 | 维度 | 纯 Splash | Rust + Splash |
 |------|-----------|--------------|
-| 适用复杂度 | 简单交互（按钮点击、表单） | 复杂逻辑（网络、并发、算法） |
+| 适用复杂度 | 中等交互（按钮、表单、HTTP 请求） | 复杂逻辑（并发、加密、文件系统） |
 | AI 友好度 | 高（AI 可完整生成） | 中（AI 生成 Splash，人写 Rust） |
 | 类型安全 | 无 | Rust 编译器保护 |
-| 调用外部库 | 不可能 | 可以（通过 Rust 调用任何 crate） |
+| 网络能力 | `net.http_request`（GET/POST/流式） | 任何 Rust crate（reqwest、tonic 等） |
 | 热重载范围 | 全部代码 | 仅 Splash 部分 |
 | 代码组织 | 单文件 | Splash UI + Rust 逻辑分离 |
 
+**注意：纯 Splash 现在也支持网络请求。** Splash 内置了 `net.http_request` API，支持 GET/POST/流式响应和 HTML 解析（`parse_html()`）。这意味着纯 Splash 应用可以调用外部 API、搜索引擎、加载远程数据——不再局限于"纯本地"场景。
+
 **经验法则**：
 
-- 如果你的应用不需要网络请求、文件操作或复杂算法 → 纯 Splash
-- 如果你需要调用 Rust 生态的 crate（tokio、serde、reqwest 等）→ Rust + Splash
+- 简单到中等复杂度（UI + HTTP API 调用）→ 纯 Splash
+- 需要文件系统、加密、并发、或特定 Rust crate → Rust + Splash
 - 如果 AI Agent 需要动态生成和修改 UI → 纯 Splash（这是 Canvas 的模式）
 - 如果团队协作开发 → Rust + Splash（Splash 负责 UI，Rust 负责业务逻辑）
 

@@ -86,6 +86,18 @@ draw_bg.border_color: #x333355    // 设置边框色（不影响上面两个）
 
 每一行都只修改点路径指向的那个字段，其他字段保持不变。这就是为什么点路径在 Splash 中如此安全——你可以放心地逐行添加或删除属性，不用担心副作用。
 
+**警告：`draw_bg:` vs `draw_bg +:`**
+
+```splash
+// ✅ 合并——只修改 color，保留 border_radius、shader 等
+draw_bg +: { color: #xf00 }
+
+// ❌ 替换——丢失 ALL 其他 draw_bg 属性（shader、radius 等全部消失）
+draw_bg: { color: #xf00 }
+```
+
+`+:` 是合并，`:` 是替换。在修改 `draw_bg` 或 `draw_text` 的子属性时，**始终使用 `+:`**。使用 `:` 会把整个绘制对象替换为你提供的值，丢失 Widget 默认的 shader、圆角、边框等属性——通常导致组件外观完全错乱。点路径语法（`draw_bg.color:`）内部等价于 `+:`，所以点路径是安全的。
+
 ---
 
 ## 容器组件：View 家族
@@ -442,7 +454,23 @@ RoundedView{width: Fill height: Fit draw_bg.color: #x334
 
 **规则：在 Splash 中，每个 View/SolidView/RoundedView 都显式写 `height: Fit`，除非你确定父容器有固定高度或 `height: Fill`。**
 
-### 陷阱二：颜色中的 `e` 导致解析错误
+### 陷阱二：根容器使用固定宽度
+
+```splash
+// ❌ 错误：根容器固定宽度，无法适配不同屏幕
+RoundedView{width: 400 height: Fit draw_bg.color: #x334
+    Label{text: "Narrow sliver or clipped"}
+}
+
+// ✅ 正确：根容器用 width: Fill
+RoundedView{width: Fill height: Fit draw_bg.color: #x334
+    Label{text: "Adapts to available width"}
+}
+```
+
+**根容器（最外层组件）必须使用 `width: Fill`**。固定宽度（如 `width: 400`）不会适应可用空间——如果父容器窄于 400px，内容被裁剪；如果代码有解析错误，整个布局可能坍缩到近零宽度。固定宽度只用于内部元素（图标、头像等）。
+
+### 陷阱三：颜色中的 `e` 导致解析错误
 
 ```splash
 // ❌ 错误：1e1 被解析为科学计数法
@@ -496,7 +524,7 @@ SolidView{width: Fill height: Fit draw_bg.color: #x334
 }
 ```
 
-`View` 默认没有背景——它是一个不可见的布局容器。在它上面设置 `draw_bg.color` 不会报错，但也不会有任何效果。需要背景色时，使用 `SolidView`（矩形）或 `RoundedView`（圆角）。
+`View` 默认没有背景——它是一个不可见的布局容器。如果你尝试 `View{show_bg: true ...}`，会看到一个**丑陋的绿色测试背景**——这是 View 的默认 debug 颜色，不适合生产使用。需要背景色时，使用 `SolidView`（矩形）或 `RoundedView`（圆角），它们已经正确配置了背景 shader。
 
 ### 陷阱六：文字被背景遮盖（`new_batch` 问题）
 

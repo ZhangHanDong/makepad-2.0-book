@@ -295,6 +295,61 @@ fn tick() {
 
 ---
 
+## `net.http_request`：网络请求
+
+Splash 不仅能处理 UI 事件——它还内置了 HTTP 请求能力。`net.http_request` 让纯 Splash 应用可以调用外部 API：
+
+```splash
+let req = net.HttpRequest{
+    url: "https://api.example.com/data"
+    method: net.HttpMethod.GET
+    headers: {"User-Agent": "MakepadApp/1.0"}
+}
+net.http_request(req) do net.HttpEvents{
+    on_response: |res|{
+        let data = res.body.parse_json()
+        ui.result_label.set_text("" + data.title)
+    }
+    on_error: |e|{
+        ui.result_label.set_text("Error: " + e.message)
+    }
+}
+```
+
+支持的方法：`GET`、`POST`、`PUT`、`DELETE`、`HEAD`、`PATCH`、`OPTIONS`。
+
+POST 请求可以发送 JSON body：
+
+```splash
+let req = net.HttpRequest{
+    url: "https://api.example.com/submit"
+    method: net.HttpMethod.POST
+    headers: {"Content-Type": "application/json"}
+    body: {name: "test" value: 42}.to_json()
+}
+```
+
+流式响应用 `is_streaming: true` + `on_stream` 回调：
+
+```splash
+let req = net.HttpRequest{url: "..." method: net.HttpMethod.POST is_streaming: true}
+net.http_request(req) do net.HttpEvents{
+    on_stream: |res|{ /* 每个 chunk 调用一次 */ }
+    on_complete: |res|{ /* 流结束 */ }
+}
+```
+
+Splash 还内置了 `parse_html()` 方法，可以解析 HTML 响应并用 CSS 选择器查询元素——适合抓取网页数据：
+
+```splash
+let doc = html_string.parse_html()
+let titles = doc.select("h2.title")
+```
+
+`net.http_request` 改变了纯 Splash 的能力边界——以前纯 Splash 应用无法做网络请求，现在可以了。这让 AI 生成的纯 Splash 应用可以直接调用 API、搜索引擎、加载远程数据（详见第4章：两种模式的选择）。
+
+---
+
 ## 实战：pomodoro 的完整事件地图
 
 把 pomodoro.splash 中的所有事件梳理出来，形成一张完整的事件地图：

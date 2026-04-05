@@ -55,11 +55,30 @@ ui.view.render()             // 触发 on_render
 ui.btn.on_click()            // 程序化点击
 ```
 
-## 六条必记规则
+## 网络请求
+
+```splash
+let req = net.HttpRequest{
+    url: "https://api.example.com/data"
+    method: net.HttpMethod.GET
+}
+net.http_request(req) do net.HttpEvents{
+    on_response: |res|{ let data = res.body.parse_json() }
+    on_error: |e|{ /* 错误处理 */ }
+}
+```
+
+方法：`GET` / `POST` / `PUT` / `DELETE` / `HEAD` / `PATCH`
+流式：`is_streaming: true` + `on_stream` / `on_complete`
+HTML 解析：`html_string.parse_html().select("css selector")`
+
+## 八条必记规则
 
 1. **`height: Fit`** — 每个容器必须设置
-2. **`#x` 前缀** — 所有颜色统一使用
-3. **`new_batch: true`** — 有背景+文字时必须加
-4. **`:=` 命名** — 需要覆写的子组件用 `:=`
-5. **`SolidView`/`RoundedView`** — 需要背景色时用（不用 `View`）
-6. **尾部点号** — 浮点数写 `8.` 不写 `8`
+2. **`width: Fill`** — 根容器必须用 Fill（不用固定宽度）
+3. **`#x` 前缀** — 所有颜色统一使用
+4. **`new_batch: true`** — 有背景+文字时必须加
+5. **`:=` 命名** — 需要覆写的子组件用 `:=`
+6. **`SolidView`/`RoundedView`** — 需要背景色时用（不用 `View`）
+7. **尾部点号** — 浮点数写 `8.` 不写 `8`
+8. **`draw_bg +:`** — 修改子属性用 `+:`（不用 `:`，会替换全部）
